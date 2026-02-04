@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-lime-400: #a3e635;
+  --color-electric-lime: #ccff00;
+
+  --font-syne: var(--font-syne);
+  --font-inter: var(--font-inter);
+}
+
+:root {
+  --background: #050505;
+  --foreground: #ededed;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-syne), sans-serif;
+}
+
+/* Fluid Typography */
+.text-hero {
+  font-size: clamp(3rem, 15vw, 20rem);
+  line-height: 0.8;
+  letter-spacing: -0.05em;
+}
+
+.text-display {
+  font-size: clamp(2.5rem, 8vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+}
+
+.text-narrative {
+  font-size: clamp(1rem, 2vw, 1.5rem);
+  line-height: 1.4;
+  letter-spacing: -0.02em;
+}
+
+/* Anti-SaaS Resets */
+button,
+div,
+section {
+  border-radius: 4px;
+  /* Default strict radius, override per component if needed */
+}
