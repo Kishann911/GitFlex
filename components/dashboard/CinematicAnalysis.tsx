@@ -2,9 +2,10 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState, useRef } from "react";
-import { Check, Loader2, Search, Code2, Cpu, UserCircle2, BarChart3, RotateCcw, XCircle, Terminal } from "lucide-react";
+import { Check, Loader2, Search, Code2, Cpu, UserCircle2, BarChart3, RotateCcw, XCircle, Terminal, Package, BoxSelect } from "lucide-react";
 
-export type AnalysisStageId = "fetching" | "languages" | "stacks" | "persona" | "scoring";
+export type AnalysisStageId = "fetching" | "languages" | "stacks" | "persona" | "scoring" | "structure" | "dependencies";
+export type AnalysisType = "profile" | "repo";
 
 export interface AnalysisStage {
     id: AnalysisStageId;
@@ -19,9 +20,10 @@ export interface AnalysisStage {
 interface CinematicAnalysisProps {
     onComplete: () => void;
     onCancel: () => void;
+    type?: AnalysisType;
 }
 
-const STAGE_CONFIG: Record<AnalysisStageId, { label: string, desc: string, icon: any }> = {
+const PROFILE_CONFIG: Record<string, { label: string, desc: string, icon: any }> = {
     fetching: { label: "Repository Discovery", desc: "Indexing public contributions...", icon: Search },
     languages: { label: "Linguistic Analysis", desc: "Parsing language distribution...", icon: Code2 },
     stacks: { label: "Stack Detection", desc: "Identifying primary frameworks...", icon: Cpu },
@@ -29,19 +31,29 @@ const STAGE_CONFIG: Record<AnalysisStageId, { label: string, desc: string, icon:
     scoring: { label: "Profile Scoring", desc: "Calculating maturity signals...", icon: BarChart3 },
 };
 
-export function CinematicAnalysis({ onComplete, onCancel }: CinematicAnalysisProps) {
+const REPO_CONFIG: Record<string, { label: string, desc: string, icon: any }> = {
+    fetching: { label: "Cloning Metadata", desc: "Indexing file structure...", icon: Search },
+    structure: { label: "Architecture Scan", desc: "Mapping folder hierarchy...", icon: BoxSelect },
+    dependencies: { label: "Dependency Graph", desc: "Resolving package tree...", icon: Package },
+    stacks: { label: "Framework Lock", desc: "Identifying core libraries...", icon: Cpu },
+    persona: { label: "Project Classification", desc: "Detecting project archetype...", icon: BarChart3 },
+};
+
+export function CinematicAnalysis({ onComplete, onCancel, type = "profile" }: CinematicAnalysisProps) {
+    const CONFIG = type === "profile" ? PROFILE_CONFIG : REPO_CONFIG;
+
     const [stages, setStages] = useState<AnalysisStage[]>(
-        (Object.keys(STAGE_CONFIG) as AnalysisStageId[]).map(id => ({
+        (Object.keys(CONFIG) as AnalysisStageId[]).map(id => ({
             id,
-            label: STAGE_CONFIG[id].label,
-            description: STAGE_CONFIG[id].desc,
+            label: CONFIG[id].label,
+            description: CONFIG[id].desc,
             icon: <div />, // Placeholder, will set in render
             status: "waiting",
             progress: 0
         }))
     );
     const [currentStageIndex, setCurrentStageIndex] = useState(0);
-    const [logs, setLogs] = useState<string[]>(["[SYSTEM] Initializing Neural Engine v2.0..."]);
+    const [logs, setLogs] = useState<string[]>([`[SYSTEM] Initializing ${type === "profile" ? "Neural Engine" : "RepoScanner"} v2.0...`]);
     const logContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -86,21 +98,32 @@ export function CinematicAnalysis({ onComplete, onCancel }: CinematicAnalysisPro
 
                 // Occasionally add sub-logs
                 if (Math.random() > 0.8) {
-                    const subLogs = {
+                    const profileSubLogs: Record<string, string[]> = {
                         fetching: ["Accessing GitHub API...", "Scanning 'web-portfolio'...", "Indexed 42 repos."],
                         languages: ["Mapped 12,042 lines of TS.", "Weighted Rust vs Go...", "Detected ShaderLab."],
                         stacks: ["Next.js recognized.", "Tailwind patterns found.", "GraphQL focus detected."],
                         persona: ["Analyzing commit sentiment...", "Mapping creative output...", "Architect traits: HIGH."],
                         scoring: ["Consistency: 92/100", "Diversity: 78/100", "Finalizing signals..."]
                     };
-                    const potentialLogs = subLogs[stage.id];
-                    setLogs(prev => [...prev, ` › ${potentialLogs[Math.floor(Math.random() * potentialLogs.length)]}`]);
+
+                    const repoSubLogs: Record<string, string[]> = {
+                        fetching: ["Reading git tree...", "Checking HEAD refs...", "Ignoring node_modules."],
+                        structure: ["Found src/ directory.", "Detected monorepo roots.", "Parsing config files..."],
+                        dependencies: ["Reading package.json...", "Resolving peer dependencies.", "Version conflict check: PASS."],
+                        stacks: ["Next.js App Router detected.", "Tailwind config found.", "Prisma schema validated."],
+                        persona: ["Classifying as SaaS...", "Calculating maintainability score...", "Generating install signatures."]
+                    };
+
+                    const potentialLogs = (type === "profile" ? profileSubLogs : repoSubLogs)[stage.id];
+                    if (potentialLogs) {
+                        setLogs(prev => [...prev, ` › ${potentialLogs[Math.floor(Math.random() * potentialLogs.length)]}`]);
+                    }
                 }
             }
         }, 200);
 
         return () => clearInterval(interval);
-    }, [currentStageIndex, onComplete, stages.length]);
+    }, [currentStageIndex, onComplete, stages.length, type]);
 
     const handleRetry = () => {
         window.location.reload(); // Hard reset for clean state
@@ -116,7 +139,7 @@ export function CinematicAnalysis({ onComplete, onCancel }: CinematicAnalysisPro
                         animate={{ opacity: 1, x: 0 }}
                         className="text-4xl font-syne font-bold mb-2 bg-gradient-to-r from-white to-zinc-500 bg-clip-text text-transparent"
                     >
-                        Analyzing presence
+                        {type === "profile" ? "Analyzing presence" : "Scanning repository"}
                     </motion.h2>
                     <div className="flex items-center gap-2">
                         <div className="w-2 h-2 rounded-full bg-lime-400 animate-pulse" />
@@ -130,7 +153,7 @@ export function CinematicAnalysis({ onComplete, onCancel }: CinematicAnalysisPro
                     <AnimatePresence mode="popLayout">
                         {stages.map((stage, index) => {
                             const isVisible = index <= currentStageIndex;
-                            const Icon = STAGE_CONFIG[stage.id].icon;
+                            const Icon = CONFIG[stage.id].icon;
                             if (!isVisible) return null;
 
                             return (

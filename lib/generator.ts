@@ -12,35 +12,59 @@ export interface ReadmeVariant {
  * UTILS FOR PREMIUM GENERATION
  */
 
-const getShield = (label: string, value: string, color: string = "lime") =>
-    `![${label}](https://img.shields.io/badge/${encodeURIComponent(label)}-${encodeURIComponent(value)}-${color}?style=flat-square&labelColor=18181b)`;
+const getShield = (label: string, value: string, color: string = "lime") => {
+    // Accessible color mapping
+    const colorMap: Record<string, string> = {
+        "lime": "a3e635",
+        "zinc": "18181b",
+        "white": "ffffff",
+        "error": "ef4444"
+    };
+    const hex = colorMap[color] || color;
+    return `![${label}](https://img.shields.io/badge/${encodeURIComponent(label)}-${encodeURIComponent(value)}-${hex}?style=flat-square&labelColor=18181b)`;
+};
 
 const formatProjects = (projects: FeaturedProject[], style: 'classic' | 'minimal' | 'cards') => {
+    if (projects.length === 0) return "*No public projects discovered yet.*";
+
+    // Highlight first project as 'Hero'
+    const hero = projects[0];
+    const others = projects.slice(1);
+
     if (style === 'minimal') {
         return projects.map(p => `- **[${p.name}](${p.url})** — ${p.description}`).join('\n');
     }
+
     if (style === 'cards') {
-        return projects.map(p => `
-### [${p.name}](${p.url})
-> ${p.description}
-${getShield("Stars", p.stars.toString(), "white")} ${getShield("Stack", p.language, "zinc")}
-`).join('\n');
+        const heroMarkdown = `
+### 🚀 Hero Project: [${hero.name}](${hero.url})
+> ${hero.description}
+${getShield("Primary Stack", hero.language, "lime")} ${getShield("Stars", hero.stars.toString(), "white")}
+`;
+        const othersMarkdown = others.length > 0 ? `
+#### Secondary Architectures
+${others.map(p => `- [${p.name}](${p.url}) — *${p.language}*`).join('\n')}
+` : '';
+        return heroMarkdown + othersMarkdown;
     }
+
     return projects.map(p => `#### ${p.name}\n${p.description}\n`).join('\n');
 };
 
 const getPersonalityBio = (role: string) => {
     const bios: Record<string, string> = {
-        "Backend Architect": "Focused on building resilient distributed systems and optimizing high-throughput data pipelines. I prefer clean abstractions over clever hacks.",
-        "Frontend Engineer": "Obsessed with interaction design and accessible interfaces. I believe the best UI is the one that feels invisible to the user.",
-        "Creative Technologist": "Exploring the tension between code and canvas. I build immersive experiences that push the boundaries of what's possible in the browser.",
-        "ML Engineer": "Deeply invested in making intelligence practical. My focus is on robust model deployment and data hygiene.",
-        "Indie Hacker": "Generalist by choice, builder by nature. I focus on shipping MVPs that solve real problems with zero technical debt.",
-        "Full Stack Dev": "End-to-end builder with a passion for architectural integrity from database schema to UI components.",
-        "Systems Designer": "Operating at the intersection of hardware and high-level abstractions. Zero-cost abstractions are my love language.",
-        "UI Scientist": "Experimental builder focusing on the evolution of human-computer interaction. Prototypes are my primary medium."
+        "Backend Architect": "Architecting resilient distributed systems. I prioritize architectural integrity, scalability, and type-safety in high-throughput environments.",
+        "Frontend Engineer": "Building accessible, high-performance user interfaces. I believe the browser is an infinite canvas for interaction design.",
+        "Creative Technologist": "Operating at the intersection of aesthetic and binary. I build immersive web experiences using WebGL and advanced motion systems.",
+        "ML Engineer": "Developing practical intelligence. Focused on neural architecture, data hygiene, and robust model deployment.",
+        "Indie Hacker": "Generalist builder optimized for shipping. I focus on high-velocity MVP development and sustainable product growth.",
+        "Full Stack Dev": "End-to-end engineer bridging the gap between database performance and UI fluidity.",
+        "Systems Designer": "Developing zero-cost abstractions and low-level efficiencies. I speak the language of memory-safety and kernel-level performance.",
+        "UI Scientist": "Experimental builder exploring the future of human-computer interaction through prototypes and gestures.",
+        "Knowledge Architect": "Synthesizing complex technical landscapes into structured, accessible knowledge. I value documentation as a first-class citizen of engineering.",
+        "Explorer": "Currently navigating the GitHub ecosystem, establishing a footprint in emerging technologies and open-source contributions."
     };
-    return bios[role] || "Passionate developer focused on building meaningful software and contributing to the open-source community.";
+    return bios[role] || "Dedicated software engineer focused on building meaningful open-source tools and contributing to the global developer community.";
 };
 
 /**
@@ -58,10 +82,10 @@ export function generateVariants(report: IntelligenceReport): ReadmeVariant[] {
 
     const variants: ReadmeVariant[] = [];
 
-    // 1. MINIMAL & CLEAN (The "Architect" / "Minimalist" hybrid)
+    // 1. MINIMAL & CLEAN
     variants.push({
         id: "minimal",
-        name: "Minimal & Clean",
+        name: "Minimalist Synthesis",
         theme: "Minimalist",
         isPremium: false,
         markdown: `
@@ -69,85 +93,85 @@ export function generateVariants(report: IntelligenceReport): ReadmeVariant[] {
 
 ${getPersonalityBio(role)}
 
-### ⚡ Technical Focus
+### ⚡ Neural Stack
 ${topLangs.join(' • ')}
 
-### 🏗 Featured Work
+### 🏗 Discovery
 ${formatProjects(featuredProjects, 'minimal')}
 
 ---
-*Generated by GitFlex Intelligence — Synthesis of ${report.primary.confidence}% accuracy.*
+*Generated via GitFlex Intelligence — Verified ${primary.role} Archetype.*
 `.trim()
     });
 
-    // 2. BOLD & EXPRESSIVE (The "Artist" Style)
+    // 2. BOLD & EXPRESSIVE
     variants.push({
         id: "bold",
-        name: "Bold & Expressive",
+        name: "Bold Expression",
         theme: "Artist",
         isPremium: true,
         markdown: `
 <div align="center">
   <h1>✦ ${role.toUpperCase()} ✦</h1>
   <p align="center">
-    <strong>Design-driven engineering. Performance-first architecture.</strong>
+    <strong>Engineering with Intent. Design with Authority.</strong>
   </p>
   <br/>
 </div>
 
-### ✦ ABOUT
+### ✦ SYNTHESIS
 ${getPersonalityBio(role)} ${secondary ? `Hybrid background in ${secondary.role}.` : ''}
 
 ### ✦ ECOSYSTEM
-${topLangs.map(l => getShield(l, "Expertise", "lime")).join(' ')}
+${topLangs.map(l => getShield(l, "Focus", "lime")).join(' ')}
 
-### ✦ RECENT ARCHITECTURES
+### ✦ ARCHITECTURES
 ${formatProjects(featuredProjects, 'cards')}
 
 <br/>
 
 <div align="center">
-  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=user&layout=compact&theme=dark" alt="Top Langs" />
+  <img src="https://github-readme-stats.vercel.app/api/top-langs/?username=${featuredProjects[0]?.url.split('/')[3] || 'user'}&layout=compact&hide_border=true&title_color=a3e635&text_color=ffffff&bg_color=18181b" alt="Top Langs" />
 </div>
 `.trim()
     });
 
-    // 3. RECRUITER-FOCUSED (The "Professional" Style)
+    // 3. RECRUITER-FOCUSED
     variants.push({
         id: "pro",
-        name: "Recruiter Focused",
+        name: "Professional Authority",
         theme: "Architect",
         isPremium: true,
         markdown: `
 # ${role}
-**Proven Expertise in ${topLangs[0]} ecosystem and ${report.primary.theme} methodologies.**
+**Expertise in ${topLangs[0] || 'Modern'} ecosystems and ${primary.theme} methodologies.**
 
-### 💼 Professional Overview
+### 💼 Career Synthesis
 ${getPersonalityBio(role)}
 
-- 🔭 **Current Focus**: ${report.signals[0]?.title || 'Professional Development'}
-- 🌱 **Recent Growth**: Detected emerging strength in ${report.emerging?.title.replace('Emerging: ', '') || 'New Frameworks'}
-- ⚡ **Signal Strength**: ${report.primary.confidence}% match for ${role} patterns.
+- 🧪 **Identity Confidence**: ${report.isUserRefined ? 'Human Verified' : `${primary.confidence}% Intelligence Match`}
+- 🔭 **Current Focus**: ${report.signals[0]?.title || 'Professional Growth'}
+- 🌱 **Neural Growth**: ${report.emerging?.title || 'Expanding Technical Horizon'}
 
 ### 🛠 Core Competencies
-| Category | Stack | Confidence |
+| Category | Technical Stack | Proficiency |
 | :--- | :--- | :--- |
-| Primary | ${topLangs.slice(0, 2).join(', ')} | High |
-| Supporting | ${topLangs.slice(2, 4).join(', ')} | Mid-Market |
+| Primary | ${topLangs.slice(0, 2).join(', ') || 'N/A'} | Expert |
+| Supporting | ${topLangs.slice(2, 4).join(', ') || 'N/A'} | Mid-Market |
 
-### 🚀 Key Open Source Contributions
+### 🚀 Key Contributions
 ${formatProjects(featuredProjects, 'classic')}
 
-### 📫 Let's Connect
-- LinkedIn: [Your Profile](#)
+### 📫 Connectivity
 - Portfolio: [YourSite.com](#)
+- LinkedIn: [Your Profile](#)
 `.trim()
     });
 
-    // 4. THE TERMINAL (Developer-to-Developer)
+    // 4. THE TERMINAL
     variants.push({
         id: "terminal",
-        name: "Terminal Interface",
+        name: "Terminal State",
         theme: "Architect",
         isPremium: false,
         markdown: `
@@ -155,21 +179,25 @@ ${formatProjects(featuredProjects, 'classic')}
 $ whoami
 > ${role}
 
-$ gitflex-analysis --report
+$ gitflex-analysis --identity
 {
-  "confidence": "${report.primary.confidence}%",
   "status": "Online",
-  "philosophy": "Building elegant solutions to complex problems."
+  "archetype": "${role}",
+  "location": "GitHub / Global",
+  "motto": "Elegant code. Efficient systems."
 }
 
-$ ls projects/
-${featuredProjects.map(p => `+ ${p.name}/`).join('\n')}
+$ ls -l projects/
+${featuredProjects.map(p => `total 1 ${p.name}/`).join('\n')}
 
-$ cat skills.txt
-[ ${topLangs.join(', ')} ]
+$ cat skills.json
+{
+  "expert": [ ${topLangs.slice(0, 3).map(l => `"${l}"`).join(', ')} ],
+  "learning": [ ${report.emerging?.title.split(': ')[1] ? `"${report.emerging.title.split(': ')[1]}"` : '"Next Generation Tech"'} ]
+}
 
-$ tail -n 1 thoughts.log
-> Refined the gap between code and design.
+$ tail -n 1 logs/current_thought.log
+> Optimizing the boundary between code and user experience.
 \`\`\`
 `.trim()
     });

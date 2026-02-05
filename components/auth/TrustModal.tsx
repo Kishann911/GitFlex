@@ -16,7 +16,7 @@ export function TrustModal({ isOpen, onClose }: TrustModalProps) {
 
     const handleConnect = async () => {
         setIsLoading(true);
-        await signIn("github", { callbackUrl: "/generating" });
+        await signIn("github", { callbackUrl: "/dashboard?action=generate" });
     };
 
     return (

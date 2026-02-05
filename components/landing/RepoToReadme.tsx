@@ -3,6 +3,7 @@
 import { motion, useScroll, useTransform, useSpring, AnimatePresence } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { TextReveal } from "@/components/ui/TextReveal";
+import { RepoInputModal } from "@/components/dashboard/RepoInputModal";
 
 const files = [
     { name: "src", type: "folder", y: -40, x: -60 },
@@ -36,6 +37,7 @@ export function RepoToReadme() {
     const [typedText, setTypedText] = useState("");
     const fullText = "github.com/your-username/chaos-repo";
     const [showInput, setShowInput] = useState(true);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Trigger typing based on scroll (simplified for auto-loop or just one-off effect)
     // For this demo, we'll auto-type when component mounts to imply "ease"
@@ -164,13 +166,17 @@ export function RepoToReadme() {
 
                         {/* Conversion Button inside the preview */}
                         <div className="absolute bottom-8 right-8">
-                            <button className="bg-lime-400 text-black px-6 py-3 rounded font-bold font-mono text-sm uppercase tracking-wide hover:bg-white transition-colors">
+                            <button
+                                onClick={() => setIsModalOpen(true)}
+                                className="bg-lime-400 text-black px-6 py-3 rounded font-bold font-mono text-sm uppercase tracking-wide hover:bg-white transition-colors"
+                            >
                                 Try with your repo →
                             </button>
                         </div>
                     </div>
                 </motion.div>
 
+                <RepoInputModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
             </div>
         </section>
     );
